@@ -15,35 +15,39 @@
 class ClusterServerPool : public ServerPoolTmpl<ClusterServerPool>
 {
 public:
-    static const char* HashTag;
+    static const char *HashTag;
+
 public:
-    ClusterServerPool(Proxy* p);
+    ClusterServerPool(Proxy *p);
     ~ClusterServerPool();
-    void init(const ClusterServerPoolConf& conf);
-    Server* redirect(const String& addr, Server* old) const;
-    const std::vector<Server*>& servers() const
+    void init(const ClusterServerPoolConf &conf);
+    Server *redirect(const String &addr, Server *old) const;
+    const std::vector<Server *> &servers() const
     {
         return mServPool;
     }
+    void removeServer(Server *srv);
+
 private:
-    Server* getServer(Handler* h, Request* req, const String& key) const;
-    void refreshRequest(Handler* h);
-    void handleResponse(Handler* h, ConnectConnection* s, Request* req, Response* res);
-    ServerGroup* getGroup(const String& nodeid) const
+    Server *getServer(Handler *h, Request *req, const String &key) const;
+    void refreshRequest(Handler *h);
+    void handleResponse(Handler *h, ConnectConnection *s, Request *req, Response *res);
+    ServerGroup *getGroup(const String &nodeid) const
     {
         auto it = mGroups.find(nodeid);
         return it == mGroups.end() ? nullptr : it->second;
     }
-    Server* iter(int& cursor) const
+    Server *iter(int &cursor) const
     {
         return ServerPool::iter(mServPool, cursor);
     }
     friend class ServerPoolTmpl<ClusterServerPool>;
+
 private:
     Hash mHash;
-    std::vector<Server*> mServPool;
-    std::map<String, ServerGroup*> mGroups;
-    ServerGroup* mSlots[Const::RedisClusterSlots];
+    std::vector<Server *> mServPool;
+    std::map<String, ServerGroup *> mGroups;
+    ServerGroup *mSlots[Const::RedisClusterSlots];
 };
 
 #endif
