@@ -13,7 +13,8 @@
 const char *ClusterServerPool::HashTag = "{}";
 
 ClusterServerPool::ClusterServerPool(Proxy *p) : ServerPoolTmpl(p, Cluster),
-                                                 mHash(Hash::Crc16)
+                                                 mHash(Hash::Crc16),
+                                                 mMtx()
 {
     mServPool.reserve(Const::MaxServNum);
     mGroupPool.reserve(Const::MaxServGroupNum);
@@ -118,15 +119,16 @@ void ClusterServerPool::removeServer(Server *serv)
 
 void ClusterServerPool::handleResponse(Handler *h, ConnectConnection *s, Request *req, Response *res)
 {
+    UniqueLock<Mutex> lck(mMtx, TryLockTag);
+    if (!lck)
+    {
+        logWarn("Preventing concurrent update of the cluster pool");
+        return;
+    }
     ClusterNodesParser p;
     p.set(res->body());
     for (auto serv : mServPool)
     {
-        logNotice("redis previous cluster configuration get node %s %s %s %s",
-                  serv->name().data(),
-                  serv->addr().data(),
-                  serv->roleStr(),
-                  serv->masterName().data());
         serv->setUpdating(true);
     }
     while (true)
@@ -253,6 +255,8 @@ void ClusterServerPool::handleResponse(Handler *h, ConnectConnection *s, Request
         if (serv->updating())
         {
             // wasn't found in the new cluster nodes, so we should remove
+            logWarn("removing server %s %s",
+                    serv->name().data(), serv->addr().data());
             serv->setUpdating(false);
             it = mServPool.erase(it);
             removeServer(serv);
@@ -307,6 +311,6 @@ void ClusterServerPool::handleResponse(Handler *h, ConnectConnection *s, Request
                 g->remove(serv);
             }
         }
-        **it;
+        ++it;
     }
 }

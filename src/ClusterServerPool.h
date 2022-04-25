@@ -45,6 +45,7 @@ private:
 
 private:
     Hash mHash;
+    Mutex mMtx;
     std::vector<Server *> mServPool;
     std::map<String, ServerGroup *> mGroups;
     ServerGroup *mSlots[Const::RedisClusterSlots];
