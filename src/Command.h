@@ -35,6 +35,7 @@ public:
 
         Cmd,
         Info,
+        Hello,
         Config,
 
         Cluster,
