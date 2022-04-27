@@ -126,6 +126,7 @@ Command Command::CmdPool[AvailableCommands] = {
     {Sinter, "sinter", 2, MaxArgs, Read},
     {Sinterstore, "sinterstore", 3, MaxArgs, Write},
     {Sismember, "sismember", 3, 3, Read},
+    {Smismember, "smismember", 3, MaxArgs, Read},
     {Smembers, "smembers", 2, 2, Read},
     {Smove, "smove", 4, 4, Write},
     {Spop, "spop", 2, 3, Write},
