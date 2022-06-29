@@ -1140,6 +1140,7 @@ void Handler::helloRequest(Request *req, const String &protocol)
         Append("server", "%s", "redis");
         Append("version", "%s", "6.2.0-proxy");
         Append("proto", "%d", 2);
+        Append("id", "%d", id());
     } while (0);
     body.end().buf = buf;
     body.end().pos = buf->length();
